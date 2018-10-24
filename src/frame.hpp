@@ -2,6 +2,7 @@
 #define FRAME_HPP
 #include <string.h>
 #include <stdio.h>
+#include <iostream>
 class frame{
     private:
         char SOH;
@@ -25,6 +26,9 @@ class frame{
         void setDataLength(int DataLength);
         void setData(char* Data);
         void setCheckSum(unsigned char CheckSum);
+
+        //other 
+        void printData();
 };
 
 #endif

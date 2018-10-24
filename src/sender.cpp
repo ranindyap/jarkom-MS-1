@@ -18,6 +18,7 @@ int main(int argc, char* argv[]){
         dest_IP = argv[4];
         dest_port = argv[5];
         char buffer[buffer_size];
+        int lastSeqNum = -1;
         // Read file
         
         ifstream file(filename);
@@ -26,9 +27,11 @@ int main(int argc, char* argv[]){
             file.read(buffer, buffer_size);
             // cout << buffer; //test
             //make frames
-            // framePerBuffer = makeFrames(buffer, buffer_size);
-            // frames.insert(frames.end(),framePerBuffer.begin(),framePerBuffer.end());
+            framePerBuffer = makeFrames(buffer, buffer_size,lastSeqNum);
+            frames.insert(frames.end(),framePerBuffer.begin(),framePerBuffer.end());
         }
+        //check if frame is good
+        printVectorFrame(frames);
         //send frames
 
     }

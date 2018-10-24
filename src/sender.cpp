@@ -1,6 +1,5 @@
 using namespace std;
 #include <iostream>
-#include "dataType.hpp"
 #include "function.hpp"
 
 
@@ -10,6 +9,7 @@ int main(int argc, char** argv){
     long buffer_size;
     char* dest_IP;
     char* dest_port; 
+    vector<frame> frames;
 
     if (argc != 6){
         cout << "There must be 5 arguments.";
@@ -25,9 +25,10 @@ int main(int argc, char** argv){
         while (file){ // While file still has content   
             cleanBuffer(buffer, buffer_size);
             file.read(buffer, buffer_size);
-            //Send
-
-
+            //make frames
+            frames = makeFrame(buffer, buffer_size);
+            //send frames
+            
         }
     }
     return 0;

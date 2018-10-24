@@ -1,6 +1,13 @@
-#include "frame.hpp"
-#include "ack.hpp"
-#include <vector>
+#include "function.hpp"
+
+unsigned char generateCheckSum(char* data, int dataLength){
+    unsigned char checkS = 0;
+    int i = 0;
+    while (i < dataLength){
+        checkS += data[i];
+    }
+    return checkS;
+}
 
 void cleanBuffer(char* buffer, long length){
     int i;
@@ -11,11 +18,11 @@ void cleanBuffer(char* buffer, long length){
     }
 }
 
-int dataLengthInBuffer(char* buffer){
+int dataLengthInBuffer(char* buffer, int buffer_length){
     int i;
     bool f = false;
     i = 0;
-    while ((i < length) && (f == false)){
+    while ((i < buffer_length) && (f == false)){
         if (buffer[i] != '\0'){
             f = true;
         } else{
@@ -32,9 +39,8 @@ vector<frame> makeFrames(char*buffer, int buffer_size){
     int dataLength;
     const int MAX_DATA_LENGTH = 1024;
     int seqNum = 0;
-    frame f;
-
     vector<frame> v;
+
     while  ((nowChar != '\0') && (counter <= buffer_size)){ // while still in buffer
         seqNum++;
         dataLength = 1;
@@ -45,18 +51,10 @@ vector<frame> makeFrames(char*buffer, int buffer_size){
             i++;
         }
         // nowChar == '\0' or i > MAX_DATA LENGTH or i > buffer_size
-        f = new frame(0x1, seqNum, dataLength, dataInFrame, generateChecksSum(dataInFrame));
+        frame f(0x1, seqNum, dataLength, dataInFrame, generateCheckSum(dataInFrame, dataLength));
         v.push_back(f);
         counter = i;
     }
     return v;
 }
 
-unsigned char generateChecksSum(char* data, int dataLength){
-    unsigned char checkS = 0;
-    int i = 0;
-    while (i < dataLength){
-        checkS += data[i];
-    }
-    return checkS;
-}

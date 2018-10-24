@@ -1,6 +1,8 @@
 #ifndef FRAME_HPP
 #define FRAME_HPP
-class frame;
+#include <string.h>
+#include <stdio.h>
+class frame{
     private:
         char SOH;
         int seqNum;

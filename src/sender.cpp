@@ -1,35 +1,36 @@
-using namespace std;
-#include <iostream>
 #include "function.hpp"
 
-
-int main(int argc, char** argv){
+int main(int argc, char* argv[]){
     char* filename;
-    long window_size;
-    long buffer_size;
+    int window_size;
+    int buffer_size;
     char* dest_IP;
     char* dest_port; 
     vector<frame> frames;
+    vector<frame> framePerBuffer;
 
     if (argc != 6){
         cout << "There must be 5 arguments.";
     } else{
-        strcpy(filename, argv[1]);
-        window_size = argv[2];
-        buffer_size = argv[3];
-        strcpy(dest_IP, argv[4]);
-        strcpy(dest_port, argv[5]);
-        char[buffer_size] buffer;
+        filename = argv[1];
+        window_size = stoi(argv[2]);
+        buffer_size = stoi(argv[3]);
+        dest_IP = argv[4];
+        dest_port = argv[5];
+        char buffer[buffer_size];
         // Read file
-        ifstream file(filename, ios::in | ios::binary);
+        
+        ifstream file(filename);
         while (file){ // While file still has content   
             cleanBuffer(buffer, buffer_size);
             file.read(buffer, buffer_size);
+            // cout << buffer; //test
             //make frames
-            frames = makeFrame(buffer, buffer_size);
-            //send frames
-            
+            // framePerBuffer = makeFrames(buffer, buffer_size);
+            // frames.insert(frames.end(),framePerBuffer.begin(),framePerBuffer.end());
         }
+        //send frames
+
     }
     return 0;
 }

@@ -31,9 +31,9 @@ int main(int argc, char* argv[]){
             frames.insert(frames.end(),framePerBuffer.begin(),framePerBuffer.end());
         }
         //check if frame is good
-        printVectorFrame(frames);
+        // printVectorFrame(frames);
         //send frames
-
+        sendFrames(frames, dest_IP, dest_port);
     }
     return 0;
 }

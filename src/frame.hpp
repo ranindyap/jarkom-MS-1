@@ -21,8 +21,14 @@
 #include <windows.h>
 #include <stdlib.h> 
 
-#ifndef DEFAULT_SERVER_PORT
-#define DEFAULT_SERVER_PORT "8080"
+#ifndef DEFAULT_RECEIVER_PORT  
+#define DEFAULT_RECEIVER_PORT 8080
+#endif
+#ifndef RECEIVER
+#define RECEIVER "127.0.0.1"  //ip address of udp server
+#endif
+#ifndef BUF_MAX_LENGTH
+#define BUF_MAX_LENGTH 1024  //Max length of buffer
 #endif
 
 class frame{

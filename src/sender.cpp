@@ -22,14 +22,7 @@ int main(int argc, char* argv[]){
         // Read file
         
         ifstream file(filename);
-        while (file){ // While file still has content   
-            cleanBuffer(buffer, buffer_size);
-            file.read(buffer, buffer_size);
-            // cout << buffer; //test
-            //make frames
-            framePerBuffer = makeFrames(buffer, buffer_size,lastSeqNum);
-            frames.insert(frames.end(),framePerBuffer.begin(),framePerBuffer.end());
-        }
+        
         //check if frame is good
         // printVectorFrame(frames);
         //send frames

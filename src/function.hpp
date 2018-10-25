@@ -9,7 +9,7 @@ using namespace std;
 
 void cleanBuffer(char* buffer, long length);
 int dataLengthInBuffer(char* buffer, int length);
-vector<frame> makeFrames(char*buffer, int length, int &lastSeqNum);
+vector<frame> makeFrames(char*buffer, int length, int &lastSeqNum, ifstream file);
 unsigned char generateCheckSum(char* data, int dataLength);
 void printVectorFrame(vector<frame> f);
 void sendFrames(vector<frame> f, char* ipAddress, char* port);

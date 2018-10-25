@@ -95,12 +95,12 @@ void sendFrames(vector<frame> f, char* ipAddress, char* port){
     addressInfoHints = makeAddressFromInfo();
 
     // Resolve the local address and port to be used by the server
-    init = getaddrinfo("localhost", DEFAULT_SERVER_PORT, &addressInfoHints, &result);
+    init = getaddrinfo(NULL, DEFAULT_SERVER_PORT, &addressInfoHints, &result);
     if (init != 0) {
         cout << "getaddrinfo failed: %d\n"<< init << endl;
         WSACleanup();
     } else{
-        cout << "getaddrinfo success " << InetNtoA(result->ai_addr) <<endl;
+        cout << "getaddrinfo success" << endl;
     }
 
     // Make Socket
@@ -127,14 +127,8 @@ void sendFrames(vector<frame> f, char* ipAddress, char* port){
         freeaddrinfo(result);
     }
 
-    //Listening
-    if ( listen(server_socket, SOMAXCONN ) == SOCKET_ERROR ) {
-        cout << "Listen failed with error: " << WSAGetLastError() << endl;
-        closesocket(server_socket);
-        WSACleanup();
-        exit(EXIT_FAILURE);
-    } else{
-        cout << "Listening..." << endl;
+    while(1){
+        
     }
 }
 

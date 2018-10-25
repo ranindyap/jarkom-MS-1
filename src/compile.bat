@@ -1,0 +1,1 @@
+g++ -std=c++11 window.cpp sender.cpp frame.cpp function.cpp -o a

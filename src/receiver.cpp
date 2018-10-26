@@ -7,6 +7,9 @@ int main(int argc, char const *argv[])
     SOCKET sock;
     WSADATA wsa;
     char buf[BUF_MAX_LENGTH];
+    char* ack_buff = new char[ACK_MAX_LENGTH+1];
+    ack sendAck;
+    frame receivedFrame;
     int recv_len, sender_len;
     int initResult, bindResult;
 
@@ -44,26 +47,38 @@ int main(int argc, char const *argv[])
         cout << "Waiting ..."<< endl;
          
         //clear the buffer by filling null, it might have previously received data
-        memset(buf,'\0', 1024);
+        memset(buf,'\0', FRAME_LENGTH);
          
         //try to receive some data, this is a blocking call
-        if ((recv_len = recvfrom(sock, buf, 1024, 0, (struct sockaddr *) &sender_address, &sender_len)) == SOCKET_ERROR)
+        if ((recv_len = recvfrom(sock, buf, FRAME_LENGTH, 0, (struct sockaddr *) &sender_address, &sender_len)) == SOCKET_ERROR)
         {
             cout << "receiver receiving failed with code :" << WSAGetLastError() << endl;
             exit(EXIT_FAILURE);
         } else{
-            //print details of the sender/peer and the data received
-            cout << "Received packet from " << inet_ntoa(sender_address.sin_addr) << ":" << ntohs(sender_address.sin_port) << endl;
-            cout << "Data: " << buf << endl;
+            // cout << buf;
+            if (strcmp(buf, FINISH_MESSAGE) == 0){
+                cout << "Finish received";
+                break;
+            } else{
+                //print details of the sender/peer and the data received
+                // cout << "Received frame from " << inet_ntoa(sender_address.sin_addr) << ":" << ntohs(sender_address.sin_port) << endl;
+                receivedFrame = parseToFrame(buf);
+                cout << "Frame SeqNum :" << receivedFrame.getSeqNum() << endl;
+                // cout << "Data: " << buf << endl;
+            }
         }
-         
+        // cout << "HORE";
+        sendAck = makeAck(receivedFrame);
+        ack_buff = sendAck.toChars();
+        // cout << "MAKE";
         //now reply the sender with the same data
-        if (sendto(sock, buf, recv_len, 0, (struct sockaddr*) &sender_address, sender_len) == SOCKET_ERROR)
+        if (sendto(sock, ack_buff, sizeof(ack_buff), 0, (struct sockaddr*) &sender_address, sender_len) == SOCKET_ERROR)
         {
-            cout << "Sending from receiver failed with code : " << WSAGetLastError() << endl;
+            cout << "Sending ACK from receiver failed with code : " << WSAGetLastError() << endl;
             exit(EXIT_FAILURE);
         } else{
-            cout << "Sending from receiver successful" << endl;
+            cout << "Sending ACK with for frame: " << sendAck.getNextSeqNum()-1 << " from receiver successful" << endl;
+            // cout << sizeof(ack_buff);
         }
     }
     closesocket(sock);

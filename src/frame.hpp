@@ -30,7 +30,12 @@
 #ifndef BUF_MAX_LENGTH
 #define BUF_MAX_LENGTH 1024  //Max length of buffer
 #endif
-
+#ifndef FRAME_LENGTH
+#define FRAME_LENGTH 1034
+#endif
+#ifndef FINISH_MESSAGE
+#define FINISH_MESSAGE "FINISH"
+#endif
 class frame{
     private:
         char SOH;
@@ -40,6 +45,7 @@ class frame{
         unsigned char checksum;
     public:
         //construct
+        frame();
         frame( char SOH,int seqNum,int dataLength,char* data, unsigned char checksum);
         //getter
         char getSOH();
@@ -57,6 +63,9 @@ class frame{
 
         //other 
         void printData();
+        void printProperties();
+
+        char* toChars();
 };
 
 #endif

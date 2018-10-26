@@ -5,7 +5,7 @@ int main(int argc, char* argv[]){
     int window_size;
     int buffer_size;
     char* dest_IP;
-    char* dest_port; 
+    unsigned short dest_port; 
     vector<frame> frames;
     vector<frame> framePerBuffer;
 
@@ -16,16 +16,16 @@ int main(int argc, char* argv[]){
         window_size = stoi(argv[2]);
         buffer_size = stoi(argv[3]);
         dest_IP = argv[4];
-        dest_port = argv[5];
+        dest_port = stoi(argv[5]);
         char buffer[buffer_size];
         int lastSeqNum = -1;
         // Read file
         
-        ifstream file(filename);
-        
         //check if frame is good
-        // printVectorFrame(frames);
+        // 
         //send frames
+        frames = makeFrames(buffer, buffer_size, lastSeqNum, filename);
+        printVectorFrameProperties(frames);
         sendFrames(frames, dest_IP, dest_port);
     }
     return 0;

@@ -42,7 +42,7 @@ int dataLengthInBuffer(char* buffer, int buffer_length){
     }
     return i+1;
 }
-vector<frame> makeFrames(char*buffer, int buffer_size, int &lastSeqNum, char* filename){\
+vector<frame> makeFrames(char*buffer, int buffer_size, int &lastSeqNum, char* filename){
     const int MAX_DATA_LENGTH = 1024;
     char nowChar = buffer[0]; // buffer character that is read now
     int i = 0; //index 
@@ -52,7 +52,6 @@ vector<frame> makeFrames(char*buffer, int buffer_size, int &lastSeqNum, char* fi
     vector<frame> v, frames;
     ifstream file(filename);
     cleanBuffer(dataInFrame,MAX_DATA_LENGTH);
-
     if (buffer_size <= MAX_DATA_LENGTH){
         cleanBuffer(buffer, buffer_size);
         file.read(buffer, buffer_size);
@@ -78,9 +77,10 @@ vector<frame> makeFrames(char*buffer, int buffer_size, int &lastSeqNum, char* fi
             }
             dataLength = i;
             lastSeqNum++;
+            // cout << lastSeqNum << " " << dataInFrame;
             frame f(0x1, lastSeqNum, dataLength, dataInFrame, generateCheckSum(dataInFrame, dataLength));
             v.push_back(f);
-            cleanBuffer(dataInFrame,MAX_DATA_LENGTH);
+            cleanBuffer(dataInFrame, MAX_DATA_LENGTH);
         }
     } else {
         while(file){
@@ -90,16 +90,28 @@ vector<frame> makeFrames(char*buffer, int buffer_size, int &lastSeqNum, char* fi
             while  ((buffer[counter] != '\0') && (counter < buffer_size)){ // while still in buffer
                 lastSeqNum++;
                 dataLength = 1;
-                cleanBuffer(dataInFrame,MAX_DATA_LENGTH);
                 i = 0;
+                cleanBuffer(dataInFrame, MAX_DATA_LENGTH);
                 while ((buffer[counter] != '\0') && (i < MAX_DATA_LENGTH)){
                     dataInFrame[i] = buffer[counter];
                     i++;
                     counter++;
                 }
+
+                if (buffer[counter] == '\0') {
+                    cleanBuffer(buffer, buffer_size);
+                    file.read(buffer, buffer_size);
+                    cout <<"Length Buffer: "<< dataLengthInBuffer(buffer, buffer_size) << endl;
+                    counter = 0;
+                    while ((buffer[counter] != '\0') && (i < MAX_DATA_LENGTH)) {
+                        dataInFrame[i] = buffer[counter];
+                        i++;
+                        counter++;  
+                    }
+                }
+                cout << "CREATE "<<lastSeqNum<<" : " <<i<< endl;
                 dataLength = i;
-                // cout << lastSeqNum << " " << dataInFrame;
-                // nowChar == '\0' or i > MAX_DATA LENGTH or i > buffer_size
+
                 frame f(0x1, lastSeqNum, dataLength, dataInFrame, generateCheckSum(dataInFrame, dataLength));
                 v.push_back(f);
             }

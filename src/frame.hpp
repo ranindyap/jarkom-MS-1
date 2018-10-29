@@ -16,6 +16,7 @@
 #include <iostream>
 #include <unistd.h> 
 #include <stdio.h> 
+#include <thread>
 #include <winsock2.h> 
 #include <Ws2tcpip.h>
 #include <windows.h>
@@ -23,6 +24,9 @@
 
 #ifndef DEFAULT_RECEIVER_PORT  
 #define DEFAULT_RECEIVER_PORT 8080
+#endif
+#ifndef TIME_OUT  
+#define TIME_OUT 3
 #endif
 #ifndef RECEIVER
 #define RECEIVER "127.0.0.1"  //ip address of udp server

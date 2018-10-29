@@ -27,7 +27,7 @@ int main(int argc, char* argv[]){
         //send frames
         frames = makeFrames(buffer, buffer_size, lastSeqNum, filename);
         printVectorFrameProperties(frames);
-        sendFrames(frames, dest_IP, dest_port);
+        sendMultiThread(frames, buffer_size, window_size, dest_IP, dest_port);
     }
     return 0;
 }

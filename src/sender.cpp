@@ -1,4 +1,5 @@
 #include "function.hpp"
+#include "window.hpp"
 
 int main(int argc, char* argv[]){
     char* filename;

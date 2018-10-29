@@ -1,4 +1,5 @@
 #include "function.hpp"
+#include "window.hpp"
 
 int main(int argc, char* argv[]){
     char* filename;
@@ -32,8 +33,10 @@ int main(int argc, char* argv[]){
         }
         //check if frame is good
         printVectorFrame(frames);
+        //window W = window(window_size, frames, frames[0].getSeqNum(), 1000);
+        //W.printWindow();
         //send frames
-
+        //sendFrames(frames, dest_IP, dest_port);
     }
     return 0;
 }

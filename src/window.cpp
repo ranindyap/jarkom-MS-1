@@ -35,7 +35,7 @@ void FrameTimer::addTimer() {
 void FrameTimer::printFrameTimer() {
     cout << "Frame SeqNum = " << this->frameSeqNum;
     cout << "Frame Timer = " << this->timer;
-    cout << "Frame Timeout = " << this->timer;
+    cout << "Frame Timeout = " << this->timeout;
 }
 
 window::window(int size, vector<frame> listOfFrame, int startSeqNum, int timeout) {
@@ -83,4 +83,8 @@ void window::addArrFrameTimer(FrameTimer frametimer) {
  
 void window::printWindow() {
     cout << this->size << endl;
+    for (int i=0; i < this->size; i++) {
+        this->arrFrameTimer[i].printFrameTimer();
+        cout << endl;
+    }
 }

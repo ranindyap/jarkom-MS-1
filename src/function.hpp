@@ -12,4 +12,7 @@ int dataLengthInBuffer(char* buffer, int length);
 vector<frame> makeFrames(char*buffer, int length, int &lastSeqNum);
 unsigned char generateCheckSum(char* data, int dataLength);
 void printVectorFrame(vector<frame> f);
+void sendFrames(vector<frame> f, char* ipAddress, char* port);
+int initWinSock(WSADATA w);
+struct addrinfo makeAddressFromInfo();
 #endif

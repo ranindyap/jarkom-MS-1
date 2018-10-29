@@ -77,7 +77,6 @@ vector<frame> makeFrames(char*buffer, int buffer_size, int &lastSeqNum, char* fi
             }
             dataLength = i;
             lastSeqNum++;
-            // cout << lastSeqNum << " " << dataInFrame;
             frame f(0x1, lastSeqNum, dataLength, dataInFrame, generateCheckSum(dataInFrame, dataLength));
             v.push_back(f);
             cleanBuffer(dataInFrame, MAX_DATA_LENGTH);
@@ -98,10 +97,9 @@ vector<frame> makeFrames(char*buffer, int buffer_size, int &lastSeqNum, char* fi
                     counter++;
                 }
 
-                if (buffer[counter] == '\0') {
+                if (buffer[counter] == '\0' || counter > buffer_size) {
                     cleanBuffer(buffer, buffer_size);
                     file.read(buffer, buffer_size);
-                    cout <<"Length Buffer: "<< dataLengthInBuffer(buffer, buffer_size) << endl;
                     counter = 0;
                     while ((buffer[counter] != '\0') && (i < MAX_DATA_LENGTH)) {
                         dataInFrame[i] = buffer[counter];
@@ -109,7 +107,7 @@ vector<frame> makeFrames(char*buffer, int buffer_size, int &lastSeqNum, char* fi
                         counter++;  
                     }
                 }
-                cout << "CREATE "<<lastSeqNum<<" : " <<i<< endl;
+                
                 dataLength = i;
 
                 frame f(0x1, lastSeqNum, dataLength, dataInFrame, generateCheckSum(dataInFrame, dataLength));

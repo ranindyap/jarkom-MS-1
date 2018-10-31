@@ -59,17 +59,16 @@ Setiap frame yang dikirimkan sender pada window memiliki timeout. Ketika receive
 | void cleanBuffer(char* buffer, long length); | Membersihkan buffer dengan cara melakukan assign null |
 | unsigned Char4ToInt(char* number); | Melakukan konversi dari char 4 byte ke integer |
 | ack parseToAck(char* buff); | Melakukan parsing bagian-bagian ACK (ACK, Next Sequence Number, Checksum) |
-| frame parseToFrame(char * buff); | 
-| int dataLengthInBuffer(char* buffer, int length); | 
-| vector<frame> makeFrames(char*buffer, int length, int &lastSeqNum, char* filename); | 
-| ack makeAck(frame f); | 
-| unsigned char generateCheckSum(char* data, int dataLength); | 
-| void printVectorFrame(vector<frame> f); | 
-| void printVectorFrameProperties(vector<frame> f); | 
-| int initWinSock(WSADATA w); | 
-| struct addrinfo makeAddressFromInfo(); | 
-| int lengthDataInBuffer(char* buffer); | 
-| bool findAck(int seqNum, vector<ack> ackV); | 
+| frame parseToFrame(char * buff); | Melakukan parsing bagian-bagian frame (SOH, Sequence Number, Data Length, Data, Checksum) |
+| int dataLengthInBuffer(char* buffer, int length); | Mengembalikan nilai data length |
+| vector<frame> makeFrames(char*buffer, int length, int &lastSeqNum, char* filename); | Membuat frame dari buffer |
+| ack makeAck(frame f); | Membuat ACK dari frame yang diterima |
+| unsigned char generateCheckSum(char* data, int dataLength); | Menghasilkan nilai checksum |
+| void printVectorFrame(vector<frame> f); | Mencetak isi vector frame |
+| void printVectorFrameProperties(vector<frame> f); | Mencetak seqNum dan dataLength dari frame dalam vector frame |
+| int initWinSock(WSADATA w); | Melakukan inisialisasi Winsock |
+| int lengthDataInBuffer(char* buffer); | Mengembalikan nilai data length |
+| bool findAck(int seqNum, vector<ack> ackV); | Mencari ACK dari frame dengan sequence number tertentu |
 
 ### File receiver.cpp
 ### File sender.cpp

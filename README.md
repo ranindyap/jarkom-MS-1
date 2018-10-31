@@ -91,3 +91,13 @@ Setiap frame yang dikirimkan sender pada window memiliki timeout. Ketika receive
 | bool notEmptyTimeOut(vector<timeOut> T) | Mengecek apakah vektor TimeOut not empty |
 |int initSocketSender(int* sender_socket, struct sockaddr_in *sender_address, char* ipAddress, unsigned short port)| Menginisialisasi sender socket|
 | int main(int argc, char* argv[]) | Fungsi utama yang menjalankan program sender |
+
+## Pembagian Tugas
+
+| Nama | NIM | Tugas|
+| -- | -- | -- |
+|Ranindya Paramitha| 13516006 | Program Utama 33%, Debugging 33%, README.md 33% |
+|Ilma Alifia M. | 13516036 | Program Utama 33%, Debugging 33%, README.md 33% |
+|Erma Safira N. | 13516072 | Program Utama 33%, Debugging 33%, README.md 33% |
+
+Dengan kata lain, kami mengerjakan semuanya bersama-sama selama 3 hari 3 malam karena tidak mampu untuk membagi tugas/ mengerjakan secara individu.

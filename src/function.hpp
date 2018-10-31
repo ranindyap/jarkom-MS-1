@@ -18,7 +18,6 @@ unsigned char generateCheckSum(char* data, int dataLength);
 void printVectorFrame(vector<frame> f);
 void printVectorFrameProperties(vector<frame> f);
 int initWinSock(WSADATA w);
-struct addrinfo makeAddressFromInfo();
 int lengthDataInBuffer(char* buffer);
 bool findAck(int seqNum, vector<ack> ackV);
 #endif

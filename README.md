@@ -59,17 +59,16 @@ Setiap frame yang dikirimkan sender pada window memiliki timeout. Ketika receive
 | void cleanBuffer(char* buffer, long length); | Membersihkan buffer dengan cara melakukan assign null |
 | unsigned Char4ToInt(char* number); | Melakukan konversi dari char 4 byte ke integer |
 | ack parseToAck(char* buff); | Melakukan parsing bagian-bagian ACK (ACK, Next Sequence Number, Checksum) |
-| frame parseToFrame(char * buff); | 
-| int dataLengthInBuffer(char* buffer, int length); | 
-| vector<frame> makeFrames(char*buffer, int length, int &lastSeqNum, char* filename); | 
-| ack makeAck(frame f); | 
-| unsigned char generateCheckSum(char* data, int dataLength); | 
-| void printVectorFrame(vector<frame> f); | 
-| void printVectorFrameProperties(vector<frame> f); | 
-| int initWinSock(WSADATA w); | 
-| struct addrinfo makeAddressFromInfo(); | 
-| int lengthDataInBuffer(char* buffer); | 
-| bool findAck(int seqNum, vector<ack> ackV); | 
+| frame parseToFrame(char * buff); | Melakukan parsing bagian-bagian frame (SOH, Sequence Number, Data Length, Data, Checksum) |
+| int dataLengthInBuffer(char* buffer, int length); | Mengembalikan nilai data length |
+| vector<frame> makeFrames(char*buffer, int length, int &lastSeqNum, char* filename); | Membuat frame dari buffer |
+| ack makeAck(frame f); | Membuat ACK dari frame yang diterima |
+| unsigned char generateCheckSum(char* data, int dataLength); | Menghasilkan nilai checksum |
+| void printVectorFrame(vector<frame> f); | Mencetak isi vector frame |
+| void printVectorFrameProperties(vector<frame> f); | Mencetak seqNum dan dataLength dari frame dalam vector frame |
+| int initWinSock(WSADATA w); | Melakukan inisialisasi Winsock |
+| int lengthDataInBuffer(char* buffer); | Mengembalikan nilai data length |
+| bool findAck(int seqNum, vector<ack> ackV); | Mencari ACK dari frame dengan sequence number tertentu |
 
 ### File receiver.cpp
 | Fungsi | Pengelasan |
@@ -83,3 +82,12 @@ Setiap frame yang dikirimkan sender pada window memiliki timeout. Ketika receive
 
 
 ### File sender.cpp
+| Fungsi | Penjelasan |
+| --- | --- |
+|bool isAllAckExistinWindow(int window_start, int window_size, vector ack ackV) | Mengecek apakah semua frame di dalam window sudah diterima ack-nya |
+| void eraseElement(int seqNum, vector ack *a) | Menghapus elemen dengan seqNum di vector ack a |
+| bool isExist(int seqNum, vector ack a)| Mengecek apakah suatu ack dengan seqNum tertentu pada vector ack a|
+| void printAckVector(vector ack ackVector) | Untuk mencetak semua seqNum ack dalam vector ke layar. |
+| bool notEmptyTimeOut(vector<timeOut> T) | Mengecek apakah vektor TimeOut not empty |
+|int initSocketSender(int* sender_socket, struct sockaddr_in *sender_address, char* ipAddress, unsigned short port)| Menginisialisasi sender socket|
+| int main(int argc, char* argv[]) | Fungsi utama yang menjalankan program sender |

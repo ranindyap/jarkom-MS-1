@@ -98,7 +98,8 @@ int main(int argc, char *argv[])
         fd_set read_fd;
         fd_set write_fd;
         fd_set timeout_fd;
-        ofstream outfile(filename);
+        ofstream outfile;
+        outfile.open(filename);
         while(strcmp(buf, FINISH_MESSAGE) != 0){
             FD_ZERO(&read_fd);
             FD_SET(sock, &read_fd);
@@ -129,7 +130,7 @@ int main(int argc, char *argv[])
                         cout << "Buffsize : " << bufferFrame.size() << endl;
                         if (bufferFrame.size() <= buffer_size){
                             memset(buf, '\0', FRAME_LENGTH);
-                            if ((recv_len = recvfrom(sock, buf, FRAME_LENGTH, 0, (struct sockaddr *) &sender_address, &sender_len)) == SOCKET_ERROR)
+                            if ((recv_len = recvfrom(sock, buf, FRAME_LENGTH+1, 0, (struct sockaddr *) &sender_address, &sender_len)) == SOCKET_ERROR)
                             {
                                 cout << "receiver receiving failed with code :" << WSAGetLastError() << endl;
                                 exit(EXIT_FAILURE);
@@ -141,9 +142,14 @@ int main(int argc, char *argv[])
                                 } else{
                                     //print details of the sender/peer and the data received
                                     // cout << "Received frame from " << inet_ntoa(sender_address.sin_addr) << ":" << ntohs(sender_address.sin_port) << endl;
+                                    // for(int i= 9; i<1033; i++){
+                                    //     cout << buf[i]; 
+                                    // }
                                     receivedFrame = parseToFrame(buf);
                                     cout << "Terima : " << receivedFrame.getSeqNum() << endl;
                                     cout << "WINDOW START NIIH : " << window_start << endl;
+                                    // cout<< receivedFrame.getData() << ' ' << receivedFrame.getDataLength() << endl;
+                                    // cout << receivedFrame.getDataLength() << endl;
                                     if ((receivedFrame.getSeqNum()%buffer_size < window_start+RWS) && (receivedFrame.getSeqNum()%buffer_size >= window_start)){
                                         bufferFrame.push_back(receivedFrame);
                                         recvFrame.push_back(receivedFrame);
@@ -163,13 +169,13 @@ int main(int argc, char *argv[])
                         for(it = recvFrame.begin(); it != recvFrame.end(); it++){
                             if (!isExist(recvFrame.at(i).getSeqNum())){
                                 sendAck = makeAck(receivedFrame);
-                                if (recvFrame.at(i).getCheckSum() != generateCheckSum(recvFrame.at(i).getData(), recvFrame.at(i).getDataLength())){
-                                    sendAck.setIdxAck(0x0);
-                                } 
+                                // if (recvFrame.at(i).getCheckSum() != generateCheckSum(recvFrame.at(i).getData(), recvFrame.at(i).getDataLength())){
+                                //     sendAck.setIdxAck(0x0);
+                                // } 
                                 ack_buff = sendAck.toChars();
                                 // cout << "MAKE";
                                 //now reply the sender with the same data
-                                if (sendto(sock, ack_buff, sizeof(ack_buff), 0, (struct sockaddr*) &sender_address, sender_len) == SOCKET_ERROR)
+                                if (sendto(sock, ack_buff, ACK_MAX_LENGTH+1, 0, (struct sockaddr*) &sender_address, sender_len) == SOCKET_ERROR)
                                 {
                                     cout << "Sending ACK from receiver failed with code : " << WSAGetLastError() << endl;
                                     exit(EXIT_FAILURE);
@@ -182,6 +188,14 @@ int main(int argc, char *argv[])
                             i++;
                         }
                     }
+            }
+        }
+        if(bufferFrame.size() != 0){
+            vector<frame>::iterator it;
+            int l = 0;
+            for(it = bufferFrame.begin();it != bufferFrame.end(); it++){
+                outfile << bufferFrame.at(l).getData();
+                l++;
             }
         }
         outfile.close();

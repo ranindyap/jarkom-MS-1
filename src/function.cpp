@@ -354,7 +354,7 @@ frame parseToFrame(char * buff){
     char stringOfDataLength[5];
     memcpy(stringOfDataLength, &buff[5],4);
     stringOfDataLength[4] = '\0';
-    int dataLength = Char4ToInt(stringOfSeqNum);
+    int dataLength = Char4ToInt(stringOfDataLength);
 
     char stringOfData[1025];
     memcpy(stringOfData, &buff[9],1024);

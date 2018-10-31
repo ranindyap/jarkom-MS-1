@@ -130,7 +130,7 @@ int main(int argc, char* argv[]){
                     exit(EXIT_FAILURE);
                 default:
                     if (FD_ISSET(sender_socket, &timeout_fd)){
-                        // cout<< "SET TIMEOUT" << endl;
+                        cout<< "SET TIMEOUT" << endl;
                         vector<timeOut>::iterator itTimeOut;
                         int i = 0;
                         for (itTimeOut = timeOutVector.begin(); itTimeOut != timeOutVector.end();itTimeOut++){
@@ -161,12 +161,13 @@ int main(int argc, char* argv[]){
                                 cout << "Ack for frame "<< realAck.getNextSeqNum() - 1 << " received" << endl;
                                 if(realAck.getIdxAck() == 0x1){
                                     ackVector.push_back(realAck);
+                                    cout << "MASUK SINI" << endl; 
                                     if ((SWS+window_start == buffer_size+buffer_start) && (findAck(window_start+SWS-1,ackVector))){
                                         buffer_start += buffer_size;
                                         window_start += SWS; 
                                         cout << "Geseeer.... window_start " << window_start << endl;
                                     }
-                                    else if (!(SWS+window_start == buffer_size+buffer_start) && (findAck(window_start, ackVector)) && (window_start+SWS <= buffer_size)){
+                                    else if (!(SWS+window_start == buffer_size+buffer_start) && (findAck(window_start, ackVector)) && (window_start+SWS <= buffer_start+buffer_size)){
                                         window_start++;
                                         cout << "Geseeer.... window_start " << window_start << endl;
                                     }
@@ -180,7 +181,7 @@ int main(int argc, char* argv[]){
                     if (FD_ISSET(sender_socket, &write_fd)) {
                         cout<< "SET WRITE" << endl;
                         vector<frame>::iterator it;
-                        char* frame_buff;
+                        char* frame_buff = new char[FRAME_LENGTH+1];
                         int size = static_cast<int>(frames.size());
                         int i =0;
                         int j = 0;
@@ -191,8 +192,8 @@ int main(int argc, char* argv[]){
                         //     cout << "Geseeer.... window_start " << window_start << endl;
                         // }
                         if (idx < frames.size()){
-                            if(idx < buffer_start+buffer_size){
-                                if(idx < window_start+SWS){
+                            if((idx < buffer_start+buffer_size) && (idx >= buffer_start)){
+                                if ((idx < window_start+SWS) && (idx >= window_start)){
                                     //sending
                                     bool sent = false;
                                     bool to = false;
@@ -213,9 +214,13 @@ int main(int argc, char* argv[]){
                                     }
                                     //  || (sent && !findAck(idx,ackVector) && (timeOutCurr-clock()>=TIME_OUT))
                                     if ((!sent) || (sent && to)){
-                                        frame_buff = frames.at(idx).toChars();    
+                                        frame_buff = frames.at(idx).toChars();   
+                                        // for(i= 9; i<1033; i++){
+                                        //     cout << frame_buff[i]; 
+                                        // }
                                         // cout << "HERE";
-                                        if (sendto(sender_socket, frame_buff, sizeof(frame_buff) , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
+                                        // cout << frames.at(idx).getData() << " " << frames.at(idx).getDataLength() << endl;
+                                        if (sendto(sender_socket, frame_buff, FRAME_LENGTH+1 , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
                                         {
                                             cout << "Sending from sender failed with code : " << WSAGetLastError() << endl;
                                             boleh = false;

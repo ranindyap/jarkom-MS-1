@@ -11,6 +11,7 @@ bool findAck(int seqNum, vector<ack> ackV){
         if (ackV.at(i).getNextSeqNum()-1 == seqNum){
             found = true;
         }
+        i++;
     }
     return found;
 }

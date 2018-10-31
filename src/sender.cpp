@@ -14,7 +14,17 @@ vector<timeOut> timeOutVector;
 vector<ack> ackVector;
 int buffer_start = 0;
 bool boleh = false;
+int window_start = 0;
 
+void printAckVector(vector<ack> ackVector){
+    vector<ack>::iterator it;
+    int i= 0;
+    for (it = ackVector.begin(); it != ackVector.end();it++){
+        cout << ackVector.at(i).getNextSeqNum()-1 << ",";
+        i++;
+    }
+    cout << endl;
+}
 bool notEmptyTimeOut(vector<timeOut> T){
     if (T.size() != 0){
         return true;
@@ -96,12 +106,12 @@ int main(int argc, char* argv[]){
         while(!(frames.size() == ackVector.size())){
             // timeout setting
             FD_ZERO(&read_fd);
-            if (idx < buffer_size){
+            if (idx <= buffer_start+buffer_size){
                 FD_SET(sender_socket, &read_fd);
             }
             
             FD_ZERO(&write_fd);
-            if (idx < buffer_size){
+            if ((idx < buffer_start+buffer_size) && (idx < frames.size())){
                 FD_SET(sender_socket, &write_fd);
             }
 
@@ -109,22 +119,25 @@ int main(int argc, char* argv[]){
             if (idx>=0){
                 FD_SET(sender_socket,&timeout_fd);
             }
-            int activity = select(32, &read_fd, &write_fd, &timeout_fd, NULL);
+            int activity = select(32, &read_fd, &write_fd,NULL, NULL);
             switch(activity){
                 case -1:
                     perror("select()");
+                    cout << "Error : " << WSAGetLastError() << endl;
                     exit(EXIT_FAILURE);    
                 case 0:
                     cout << "Select() return 0" << endl;
                     exit(EXIT_FAILURE);
                 default:
                     if (FD_ISSET(sender_socket, &timeout_fd)){
-                        cout<< "SET TIMEOUT" << endl;
+                        // cout<< "SET TIMEOUT" << endl;
                         vector<timeOut>::iterator itTimeOut;
                         int i = 0;
                         for (itTimeOut = timeOutVector.begin(); itTimeOut != timeOutVector.end();itTimeOut++){
                             if ((!findAck(timeOutVector.at(i).seqNum, ackVector)) && (timeOutVector.at(i).time - clock() >= TIME_OUT)){
+                                cout << "TIMEOUT!" << endl;
                                 idx = timeOutVector.at(i).seqNum;
+                                timeOutVector.erase(itTimeOut);
                                 break;
                             }
                             i++;
@@ -146,8 +159,17 @@ int main(int argc, char* argv[]){
                                 cout << "sender receiving ack successful" << endl;
                                 realAck = parseToAck(ackString);
                                 cout << "Ack for frame "<< realAck.getNextSeqNum() - 1 << " received" << endl;
-                                if(realAck.getIdxAck() != 0x1){
+                                if(realAck.getIdxAck() == 0x1){
                                     ackVector.push_back(realAck);
+                                    if ((SWS+window_start == buffer_size+buffer_start) && (findAck(window_start+SWS-1,ackVector))){
+                                        buffer_start += buffer_size;
+                                        window_start += SWS; 
+                                        cout << "Geseeer.... window_start " << window_start << endl;
+                                    }
+                                    else if (!(SWS+window_start == buffer_size+buffer_start) && (findAck(window_start, ackVector)) && (window_start+SWS <= buffer_size)){
+                                        window_start++;
+                                        cout << "Geseeer.... window_start " << window_start << endl;
+                                    }
                                 } else{
                                     idx = realAck.getNextSeqNum();
                                 }
@@ -162,51 +184,55 @@ int main(int argc, char* argv[]){
                         int size = static_cast<int>(frames.size());
                         int i =0;
                         int j = 0;
-                        int window_start = 0;
-                        if(idx < buffer_start+buffer_size){
-                            if(idx < window_start+SWS){
-                                //sending
-                                bool sent = false;
-                                int timeOutCurr;
-                                if (notEmptyTimeOut(timeOutVector)){
-                                    vector<timeOut>::iterator itTimeOut;
-                                    int i = 0;
-                                    for (itTimeOut = timeOutVector.begin(); itTimeOut != timeOutVector.end();itTimeOut++){
-                                        if (timeOutVector.at(i).seqNum == idx){
-                                            sent = true;
-                                            timeOutCurr = timeOutVector.at(i).time;
+                        cout << idx << endl;
+                        printAckVector(ackVector);
+                        // if ((findAck(window_start, ackVector)) && (window_start+SWS <= buffer_size)){
+                        //     window_start++;
+                        //     cout << "Geseeer.... window_start " << window_start << endl;
+                        // }
+                        if (idx < frames.size()){
+                            if(idx < buffer_start+buffer_size){
+                                if(idx < window_start+SWS){
+                                    //sending
+                                    bool sent = false;
+                                    bool to = false;
+                                    int timeOutCurr;
+                                    if (notEmptyTimeOut(timeOutVector)){
+                                        vector<timeOut>::iterator itTimeOut;
+                                        int i = 0;
+                                        for (itTimeOut = timeOutVector.begin(); itTimeOut != timeOutVector.end();itTimeOut++){
+                                            if (timeOutVector.at(i).seqNum == idx){
+                                                sent = true;
+                                                if (timeOutVector.at(i).time - clock() >= TIME_OUT ){
+                                                    to = true;
+                                                }
+                                                timeOutCurr = timeOutVector.at(i).time;
+                                            }
+                                            i++;
                                         }
-                                        i++;
                                     }
-                                }
-                                //  || (sent && !findAck(idx,ackVector) && (timeOutCurr-clock()>=TIME_OUT))
-                                if (!sent){
-                                    frame_buff = frames.at(idx).toChars();    
-                                    // cout << "HERE";
-                                    if (sendto(sender_socket, frame_buff, sizeof(frame_buff) , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
-                                    {
-                                        cout << "Sending from sender failed with code : " << WSAGetLastError() << endl;
-                                        boleh = false;
-                                        exit(EXIT_FAILURE);
+                                    //  || (sent && !findAck(idx,ackVector) && (timeOutCurr-clock()>=TIME_OUT))
+                                    if ((!sent) || (sent && to)){
+                                        frame_buff = frames.at(idx).toChars();    
+                                        // cout << "HERE";
+                                        if (sendto(sender_socket, frame_buff, sizeof(frame_buff) , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
+                                        {
+                                            cout << "Sending from sender failed with code : " << WSAGetLastError() << endl;
+                                            boleh = false;
+                                            exit(EXIT_FAILURE);
+                                        } else{
+                                            cout << "Sending from sender frame number " << frames.at(idx).getSeqNum() << " success" << endl;
+                                            boleh = true;
+                                            struct timeOut T;
+                                            T.seqNum = frames.at(idx).getSeqNum();
+                                            T.time = clock();
+                                            timeOutVector.push_back(T);
+                                            idx++;
+                                        }
                                     } else{
-                                        cout << "Sending from sender frame number " << frames.at(idx).getSeqNum() << " success" << endl;
-                                        boleh = true;
-                                        struct timeOut T;
-                                        T.seqNum = frames.at(idx).getSeqNum();
-                                        T.time = clock();
-                                        timeOutVector.push_back(T);
                                         idx++;
                                     }
-                                } else{
-                                    idx++;
                                 }
-                                if ((findAck(window_start, ackVector)) && (window_start+SWS < buffer_size)){
-                                    window_start++;
-                                }
-                            }
-                            if (SWS+window_start == buffer_size+buffer_start){
-                                buffer_start += buffer_size;
-                                window_start += SWS; 
                             }
                         }
                     }

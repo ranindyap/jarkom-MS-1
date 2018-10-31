@@ -116,6 +116,17 @@ int main(int argc, char *argv[])
                     exit(EXIT_FAILURE);
                 default:
                     if (FD_ISSET(sock, &read_fd)){
+                        if (buffer_size == bufferFrame.size()){
+                            // write file buffer kosongin
+                            vector<frame>::iterator it;
+                            int k = 0;
+                            for(it = bufferFrame.begin();it != bufferFrame.end(); it++){
+                                outfile << bufferFrame.at(k).getData();
+                                k++;
+                            }
+                            bufferFrame.clear();
+                        }
+                        cout << "Buffsize : " << bufferFrame.size() << endl;
                         if (bufferFrame.size() <= buffer_size){
                             memset(buf, '\0', FRAME_LENGTH);
                             if ((recv_len = recvfrom(sock, buf, FRAME_LENGTH, 0, (struct sockaddr *) &sender_address, &sender_len)) == SOCKET_ERROR)
@@ -131,24 +142,19 @@ int main(int argc, char *argv[])
                                     //print details of the sender/peer and the data received
                                     // cout << "Received frame from " << inet_ntoa(sender_address.sin_addr) << ":" << ntohs(sender_address.sin_port) << endl;
                                     receivedFrame = parseToFrame(buf);
-                                    if ((receivedFrame.getSeqNum() < window_start+RWS) && (receivedFrame.getSeqNum() >= window_start)){
+                                    cout << "Terima : " << receivedFrame.getSeqNum() << endl;
+                                    cout << "WINDOW START NIIH : " << window_start << endl;
+                                    if ((receivedFrame.getSeqNum()%buffer_size < window_start+RWS) && (receivedFrame.getSeqNum()%buffer_size >= window_start)){
                                         bufferFrame.push_back(receivedFrame);
                                         recvFrame.push_back(receivedFrame);
                                         cout << "Frame SeqNum :" << receivedFrame.getSeqNum() << endl;
                                     }
-                                    // cout << "Data: " << buf << endl;
                                 }
                             }
-                            if (isReceived(window_start)){
-                                window_start+= maxSeqNum(recvFrame) + 1;
+                            // cout << (maxSeqNum(recvFrame) + 1)%buffer_size +RWS << endl;
+                            if (isReceived(window_start) && !((maxSeqNum(recvFrame) + 1)%buffer_size +RWS> buffer_size)){
+                                window_start = (maxSeqNum(recvFrame) + 1)%buffer_size;
                             }
-                        }
-                        // write file buffer kosongin
-                        vector<frame>::iterator it;
-                        int k = 0;
-                        for(it = bufferFrame.begin(); it != bufferFrame.end(); it++){
-                            outfile << bufferFrame.at(k).getData();
-                            k++;
                         }
                     }
                     if (FD_ISSET(sock, &write_fd)){

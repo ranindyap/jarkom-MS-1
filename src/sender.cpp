@@ -23,7 +23,7 @@ void printAckVector(vector<ack> ackVector){
         cout << ackVector.at(i).getNextSeqNum()-1 << ",";
         i++;
     }
-    cout << endl;
+    // cout << endl;
 }
 bool notEmptyTimeOut(vector<timeOut> T){
     if (T.size() != 0){
@@ -130,11 +130,11 @@ int main(int argc, char* argv[]){
                     exit(EXIT_FAILURE);
                 default:
                     if (FD_ISSET(sender_socket, &timeout_fd)){
-                        cout<< "SET TIMEOUT" << endl;
+                        // cout<< "SET TIMEOUT" << endl;
                         vector<timeOut>::iterator itTimeOut;
                         int i = 0;
                         for (itTimeOut = timeOutVector.begin(); itTimeOut != timeOutVector.end();itTimeOut++){
-                            if ((!findAck(timeOutVector.at(i).seqNum, ackVector)) && (clock() - timeOutVector.at(i).time >= TIME_OUT)){
+                            if ((!findAck(timeOutVector.at(i).seqNum, ackVector)) && ((clock() - timeOutVector.at(i).time)/CLOCKS_PER_SEC >= TIME_OUT)){
                                 cout << "TIMEOUT!" << endl;
                                 idx = timeOutVector.at(i).seqNum;
                                 timeOutVector.erase(itTimeOut);
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]){
                         }
                     }
                     if (FD_ISSET(sender_socket, &read_fd)) {
-                        cout<< "SET READ" << endl;
+                        // cout<< "SET READ" << endl;
                         char ackString[ACK_MAX_LENGTH+5];
                         int slen = sizeof(sender_address);
                         ack realAck;
@@ -156,10 +156,10 @@ int main(int argc, char* argv[]){
                                 cout << "sender receiving ack failed with code : " << WSAGetLastError() << endl;
                                 exit(EXIT_FAILURE);
                             } else{
-                                cout << "sender receiving ack successful" << endl;
                                 realAck = parseToAck(ackString);
-                                cout << "Ack for frame "<< realAck.getNextSeqNum() - 1 << " received" << endl;
                                 if(realAck.getIdxAck() == 0x1){
+                                    cout << "sender receiving ack successful" << endl;
+                                    cout << "Ack for frame "<< realAck.getNextSeqNum() - 1 << " received" << endl;
                                     ackVector.push_back(realAck);
                                     cout << "MASUK SINI" << endl; 
                                     if ((SWS+window_start == buffer_size+buffer_start) && (findAck(window_start+SWS-1,ackVector))){
@@ -172,6 +172,8 @@ int main(int argc, char* argv[]){
                                         cout << "Geseeer.... window_start " << window_start << endl;
                                     }
                                 } else{
+                                    cout << "sender receiving NAK successful" << endl;
+                                    cout << "NAK for frame "<< realAck.getNextSeqNum()<< " received" << endl;
                                     idx = realAck.getNextSeqNum();
                                 }
                             }
@@ -179,13 +181,13 @@ int main(int argc, char* argv[]){
                     }
 
                     if (FD_ISSET(sender_socket, &write_fd)) {
-                        cout<< "SET WRITE" << endl;
+                        // cout<< "SET WRITE" << endl;
                         vector<frame>::iterator it;
                         char* frame_buff = new char[FRAME_LENGTH+1];
                         int size = static_cast<int>(frames.size());
                         int i =0;
                         int j = 0;
-                        cout << idx << endl;
+                        // cout << idx << endl;
                         printAckVector(ackVector);
                         // if ((findAck(window_start, ackVector)) && (window_start+SWS <= buffer_size)){
                         //     window_start++;
@@ -204,7 +206,7 @@ int main(int argc, char* argv[]){
                                         for (itTimeOut = timeOutVector.begin(); itTimeOut != timeOutVector.end();itTimeOut++){
                                             if (timeOutVector.at(i).seqNum == idx){
                                                 sent = true;
-                                                if (timeOutVector.at(i).time - clock() >= TIME_OUT ){
+                                                if ((clock() - timeOutVector.at(i).time)/CLOCKS_PER_SEC >= TIME_OUT ){
                                                     to = true;
                                                 }
                                                 timeOutCurr = timeOutVector.at(i).time;
@@ -219,7 +221,7 @@ int main(int argc, char* argv[]){
                                         //     cout << frame_buff[i]; 
                                         // }
                                         // cout << "HERE";
-                                        // cout << frames.at(idx).getData() << " " << frames.at(idx).getDataLength() << endl;
+                                        cout << frames.at(idx).getDataLength() << endl;
                                         if (sendto(sender_socket, frame_buff, FRAME_LENGTH+1 , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
                                         {
                                             cout << "Sending from sender failed with code : " << WSAGetLastError() << endl;

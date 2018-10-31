@@ -8,7 +8,7 @@
 using namespace std;
 
 void cleanBuffer(char* buffer, long length);
-int32_t Char4ToInt(char* number);
+unsigned Char4ToInt(char* number);
 ack parseToAck(char* buff);
 frame parseToFrame(char * buff);
 int dataLengthInBuffer(char* buffer, int length);

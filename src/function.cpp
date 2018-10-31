@@ -102,7 +102,7 @@ unsigned char generateCheckSum(char* data, int dataLength){
     Sum = -Sum;
     return (Sum & 0xFF);
 }
-int32_t Char4ToInt(char* number){
+unsigned Char4ToInt(char* number){
     return (number[3] << 24) | (number[2] << 16) | (number[1] << 8) | (number[0]);
 }
 void cleanBuffer(char* buffer, long length){
@@ -354,13 +354,13 @@ frame parseToFrame(char * buff){
     char stringOfDataLength[5];
     memcpy(stringOfDataLength, &buff[5],4);
     stringOfDataLength[4] = '\0';
-    int dataLength = Char4ToInt(stringOfDataLength);
+    unsigned int dataLength = Char4ToInt(stringOfDataLength);
 
     char stringOfData[1025];
     memcpy(stringOfData, &buff[9],1024);
     stringOfData[1024] = '\0';
 
-    char checkSum = buff[1024];
+    char checkSum = buff[1033];
 
     frame receivedFrame(SOH,seqNum,dataLength,stringOfData,checkSum);
     return receivedFrame;

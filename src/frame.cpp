@@ -67,10 +67,10 @@ char* frame::toChars(){
     buffer[3] = this->seqNum>>16;
     buffer[2] = this->seqNum>>8;
     buffer[1] = this->seqNum;
-    buffer[8] = this->dataLength>>24;
-    buffer[7] = this->dataLength>>16;
-    buffer[6] = this->dataLength>>8;
-    buffer[5] = this->dataLength;
+    buffer[8] = this->dataLength>>24 & 0xFF;
+    buffer[7] = this->dataLength>>16 & 0xFF;
+    buffer[6] = this->dataLength>>8 & 0xFF;
+    buffer[5] = this->dataLength & 0xFF;
     int i = 9;
     int j = 0;
     for (j = 0; j < 1024; j++){

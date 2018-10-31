@@ -26,7 +26,7 @@
 #define DEFAULT_RECEIVER_PORT 8080
 #endif
 #ifndef TIME_OUT  
-#define TIME_OUT 3
+#define TIME_OUT 3000
 #endif
 #ifndef RECEIVER
 #define RECEIVER "127.0.0.1"  //ip address of udp server

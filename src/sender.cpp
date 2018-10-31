@@ -134,7 +134,7 @@ int main(int argc, char* argv[]){
                         vector<timeOut>::iterator itTimeOut;
                         int i = 0;
                         for (itTimeOut = timeOutVector.begin(); itTimeOut != timeOutVector.end();itTimeOut++){
-                            if ((!findAck(timeOutVector.at(i).seqNum, ackVector)) && (timeOutVector.at(i).time - clock() >= TIME_OUT)){
+                            if ((!findAck(timeOutVector.at(i).seqNum, ackVector)) && (clock() - timeOutVector.at(i).time >= TIME_OUT)){
                                 cout << "TIMEOUT!" << endl;
                                 idx = timeOutVector.at(i).seqNum;
                                 timeOutVector.erase(itTimeOut);

@@ -21,5 +21,8 @@ void sendFrames(vector<frame> f, char* ipAddress, unsigned short port);
 int initWinSock(WSADATA w);
 struct addrinfo makeAddressFromInfo();
 int lengthDataInBuffer(char* buffer);
-
+// void sendMessage(vector<frame> frames, int buffer_start, int buffer_size, int window_size, int sender_socket, struct sockaddr_in sender_address ) ;
+// void receiveMessage(int vectorLength, int sender_socket, struct sockaddr_in sender_address);
+// void sendMultiThread(vector<frame> frames, int buffer_size, int window_size, char* ipAddress, unsigned short port);
+bool findAck(int seqNum, vector<ack> ackV);
 #endif

@@ -72,4 +72,14 @@ Setiap frame yang dikirimkan sender pada window memiliki timeout. Ketika receive
 | bool findAck(int seqNum, vector<ack> ackV); | 
 
 ### File receiver.cpp
+| Fungsi | Pengelasan |
+| --- | --- |
+| bool isExist(int seqNum, vector<int> ackSent) | Mengecek apakah seqNum terdapat pada vector of seqNum yang sudah dikirimkan |
+| void eraseElement(int seqNum, vector<int> *a) | Menghapus elemen seqNum pada vektor a (berisi vector of seqNum) |
+| void printIntVector(vector<int> intVector) | Menampilkan vector intVector pada output |
+| int maxSeqNum(vector<frame> recvFrame) | Mengembalikan nilai seqNum paling besar pada vector recvFrame |
+| bool isReceived(int seqNum) | Mengecek apakah frame dengan seqNum tertentu telah diterima |
+| int main(int argc, char *argv[]) | Fungsi utama yang menjalankan program receiver |
+
+
 ### File sender.cpp

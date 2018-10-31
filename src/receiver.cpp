@@ -169,9 +169,12 @@ int main(int argc, char *argv[])
                         for(it = recvFrame.begin(); it != recvFrame.end(); it++){
                             if (!isExist(recvFrame.at(i).getSeqNum())){
                                 sendAck = makeAck(receivedFrame);
-                                // if (recvFrame.at(i).getCheckSum() != generateCheckSum(recvFrame.at(i).getData(), recvFrame.at(i).getDataLength())){
-                                //     sendAck.setIdxAck(0x0);
-                                // } 
+                                if (recvFrame.at(i).getSeqNum() == 2) {
+                                    recvFrame.at(i).getSeqNum() == 0;
+                                }
+                                if (recvFrame.at(i).getCheckSum() != generateCheckSum(recvFrame.at(i).getData(), recvFrame.at(i).getDataLength())){
+                                    sendAck.setIdxAck(0x0);
+                                } 
                                 ack_buff = sendAck.toChars();
                                 // cout << "MAKE";
                                 //now reply the sender with the same data

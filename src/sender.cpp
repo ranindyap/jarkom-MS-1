@@ -1,5 +1,4 @@
 #include "function.hpp"
-#include "window.hpp"
 // GLOBAL
 #define FRAMESIZE 1034
 #define ACKSIZE 6
@@ -12,10 +11,42 @@ struct timeOut{
 } T;
 vector<timeOut> timeOutVector;
 vector<ack> ackVector;
+vector<ack> nakVector;
 int buffer_start = 0;
 bool boleh = false;
 int window_start = 0;
 
+bool isAllAckExistinWindow(int window_start, int window_size, vector<ack> ackV){
+    bool is = true;
+    for(int i = window_start; i < window_start+window_size; i++){
+        is = is && findAck(i, ackV);
+    }
+    return is;
+}
+void eraseElement(int seqNum, vector<ack> *a){
+    vector<ack>::iterator it;
+    int i= 0;
+    for (it = a->begin(); it != a->end();it++){
+        if (a->at(i).getNextSeqNum() == seqNum){
+            a->erase(a->begin() + i);
+            break;
+        }
+        i++;
+    }
+}
+
+bool isExist(int seqNum, vector<ack> a){
+    vector<ack>::iterator it;
+    bool is = false;
+    int i= 0;
+    for (it = a.begin(); it != a.end();it++){
+        if (a.at(i).getNextSeqNum() == seqNum){
+            is = true;
+        }
+        i++;
+    }
+    return is;
+}
 void printAckVector(vector<ack> ackVector){
     vector<ack>::iterator it;
     int i= 0;
@@ -161,22 +192,24 @@ int main(int argc, char* argv[]){
                                     cout << "sender receiving ack successful" << endl;
                                     cout << "Ack for frame "<< realAck.getNextSeqNum() - 1 << " received" << endl;
                                     ackVector.push_back(realAck);
-                                    cout << "MASUK SINI" << endl; 
-                                    if ((SWS+window_start == buffer_size+buffer_start) && (findAck(window_start+SWS-1,ackVector))){
+                                    eraseElement(realAck.getNextSeqNum() - 1, &nakVector);
+                                    if ((SWS+window_start == buffer_size+buffer_start) && (isAllAckExistinWindow(window_start,SWS, ackVector))){
                                         buffer_start += buffer_size;
                                         window_start += SWS; 
-                                        cout << "Geseeer.... window_start " << window_start << endl;
+                                        cout << "window_start = " << window_start << endl;
                                     }
                                     else if (!(SWS+window_start == buffer_size+buffer_start) && (findAck(window_start, ackVector)) && (window_start+SWS <= buffer_start+buffer_size)){
                                         window_start++;
-                                        cout << "Geseeer.... window_start " << window_start << endl;
+                                        cout << "window_start = " << window_start << endl;
                                     }
                                 } else{
                                     cout << "sender receiving NAK successful" << endl;
                                     cout << "NAK for frame "<< realAck.getNextSeqNum()<< " received" << endl;
+                                    nakVector.push_back(realAck);
                                     idx = realAck.getNextSeqNum();
                                 }
                             }
+                            // printAckVector(ackVector);
                         }
                     }
 
@@ -188,7 +221,6 @@ int main(int argc, char* argv[]){
                         int i =0;
                         int j = 0;
                         // cout << idx << endl;
-                        printAckVector(ackVector);
                         // if ((findAck(window_start, ackVector)) && (window_start+SWS <= buffer_size)){
                         //     window_start++;
                         //     cout << "Geseeer.... window_start " << window_start << endl;
@@ -215,13 +247,13 @@ int main(int argc, char* argv[]){
                                         }
                                     }
                                     //  || (sent && !findAck(idx,ackVector) && (timeOutCurr-clock()>=TIME_OUT))
-                                    if ((!sent) || (sent && to)){
+                                    if ((!sent) || (sent && to) || (isExist(idx,nakVector))){
                                         frame_buff = frames.at(idx).toChars();   
                                         // for(i= 9; i<1033; i++){
                                         //     cout << frame_buff[i]; 
                                         // }
                                         // cout << "HERE";
-                                        cout << frames.at(idx).getDataLength() << endl;
+                                        // cout << frames.at(idx).getDataLength() << endl;
                                         if (sendto(sender_socket, frame_buff, FRAME_LENGTH+1 , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
                                         {
                                             cout << "Sending from sender failed with code : " << WSAGetLastError() << endl;

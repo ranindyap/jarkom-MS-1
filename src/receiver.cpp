@@ -5,9 +5,10 @@ int RWS;
 vector<frame> bufferFrame;
 vector<frame> recvFrame;
 vector<int> ackSent;
+vector<int> nakSent;
 int window_start = 0;
 
-bool isExist(int seqNum){
+bool isExist(int seqNum, vector<int> ackSent){
     vector<int>::iterator it;
     bool is = false;
     int i= 0;
@@ -18,6 +19,28 @@ bool isExist(int seqNum){
         i++;
     }
     return is;
+}
+void eraseElement(int seqNum, vector<int> *a){
+    if (isExist(seqNum, *a)){
+        vector<int>::iterator it;
+        int i= 0;
+        for (it = a->begin(); it != a->end();it++){
+            if (a->at(i) == seqNum){
+                a->erase(a->begin() + i);
+                break;
+            }
+            i++;
+        }
+    }
+}
+void printIntVector(vector<int> intVector){
+    vector<int>::iterator it;
+    int i= 0;
+    for (it = intVector.begin(); it != intVector.end();it++){
+        cout << intVector.at(i)<< ",";
+        i++;
+    }
+    // cout << endl;
 }
 int maxSeqNum(vector<frame> recvFrame){
     vector<frame>::iterator it;
@@ -101,6 +124,7 @@ int main(int argc, char *argv[])
         ofstream outfile;
         outfile.open(filename);
         while(strcmp(buf, FINISH_MESSAGE) != 0){
+            // printIntVector(nakSent);
             FD_ZERO(&read_fd);
             FD_SET(sock, &read_fd);
             
@@ -127,7 +151,7 @@ int main(int argc, char *argv[])
                             }
                             bufferFrame.clear();
                         }
-                        cout << "Buffsize : " << bufferFrame.size() << endl;
+                        // cout << "Buffsize : " << bufferFrame.size() << endl;
                         if (bufferFrame.size() <= buffer_size){
                             memset(buf, '\0', FRAME_LENGTH);
                             if ((recv_len = recvfrom(sock, buf, FRAME_LENGTH+1, 0, (struct sockaddr *) &sender_address, &sender_len)) == SOCKET_ERROR)
@@ -149,10 +173,12 @@ int main(int argc, char *argv[])
                                     cout << "Terima : " << receivedFrame.getSeqNum() << endl;
                                     cout << "WINDOW START NIIH : " << window_start << endl;
                                     // cout<< receivedFrame.getData() << ' ' << receivedFrame.getDataLength() << endl;
-                                    // cout << receivedFrame.getDataLength() << endl;
+                                    receivedFrame.setDataLength(lengthDataInBuffer(receivedFrame.getData()));
+                                    cout << receivedFrame.getDataLength() << endl;
                                     if ((receivedFrame.getSeqNum()%buffer_size < window_start+RWS) && (receivedFrame.getSeqNum()%buffer_size >= window_start)){
                                         bufferFrame.push_back(receivedFrame);
                                         recvFrame.push_back(receivedFrame);
+                                        eraseElement(receivedFrame.getSeqNum(), &nakSent);
                                         cout << "Frame SeqNum :" << receivedFrame.getSeqNum() << endl;
                                     }
                                 }
@@ -167,13 +193,14 @@ int main(int argc, char *argv[])
                         vector<frame>::iterator it;
                         int i = 0;
                         for(it = recvFrame.begin(); it != recvFrame.end(); it++){
-                            if (!isExist(recvFrame.at(i).getSeqNum())){
-                                sendAck = makeAck(receivedFrame);
-                                if (recvFrame.at(i).getSeqNum() == 2) {
-                                    recvFrame.at(i).getSeqNum() == 0;
-                                }
+                            if ((!isExist(recvFrame.at(i).getSeqNum(), ackSent)) && (!isExist(recvFrame.at(i).getSeqNum(), nakSent))){
+                                sendAck = makeAck(recvFrame.at(i));
+                                // if (recvFrame.at(i).getSeqNum() == 2){
+                                //     recvFrame.at(i).setCheckSum(2);
+                                // }
                                 if (recvFrame.at(i).getCheckSum() != generateCheckSum(recvFrame.at(i).getData(), recvFrame.at(i).getDataLength())){
                                     sendAck.setIdxAck(0x0);
+                                    sendAck.setNextSeqNum(sendAck.getNextSeqNum()-1);
                                 } 
                                 ack_buff = sendAck.toChars();
                                 // cout << "MAKE";
@@ -183,8 +210,16 @@ int main(int argc, char *argv[])
                                     cout << "Sending ACK from receiver failed with code : " << WSAGetLastError() << endl;
                                     exit(EXIT_FAILURE);
                                 } else{
-                                    cout << "Sending ACK with for frame: " << sendAck.getNextSeqNum()-1 << " from receiver successful" << endl;
-                                    ackSent.push_back(sendAck.getNextSeqNum()-1);
+                                    if (sendAck.getIdxAck() == 0x1){
+                                        cout << "Sending ACK with for frame: " << sendAck.getNextSeqNum()-1 << " from receiver successful" << endl;
+                                        ackSent.push_back(sendAck.getNextSeqNum()-1);
+                                        eraseElement(sendAck.getNextSeqNum()-1, &nakSent);
+                                    } else{
+                                        if (!isExist(sendAck.getNextSeqNum(), nakSent)){
+                                            cout << "Sending NAK with for frame: " << sendAck.getNextSeqNum()<< " from receiver successful" << endl;
+                                            nakSent.push_back(sendAck.getNextSeqNum());
+                                        }
+                                    }
                                     // cout << sizeof(ack_buff);
                                 }
                             }

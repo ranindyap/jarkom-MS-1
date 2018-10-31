@@ -73,3 +73,12 @@ Setiap frame yang dikirimkan sender pada window memiliki timeout. Ketika receive
 
 ### File receiver.cpp
 ### File sender.cpp
+| Fungsi | Penjelasan |
+| --- | --- |
+|bool isAllAckExistinWindow(int window_start, int window_size, vector ack ackV) | Mengecek apakah semua frame di dalam window sudah diterima ack-nya |
+| void eraseElement(int seqNum, vector ack *a) | Menghapus elemen dengan seqNum di vector ack a |
+| bool isExist(int seqNum, vector ack a)| Mengecek apakah suatu ack dengan seqNum tertentu pada vector ack a|
+| void printAckVector(vector ack ackVector) | Untuk mencetak semua seqNum ack dalam vector ke layar. |
+| bool notEmptyTimeOut(vector<timeOut> T) | Mengecek apakah vektor TimeOut not empty |
+|int initSocketSender(int* sender_socket, struct sockaddr_in *sender_address, char* ipAddress, unsigned short port)| Menginisialisasi sender socket|
+| int main(int argc, char* argv[]) | Fungsi utama yang menjalankan program sender |

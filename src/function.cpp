@@ -1,8 +1,7 @@
 #include "function.hpp"
 
 
-vector<timeOut> timeOutVector;
-vector<ack> ackVector;
+
 
 bool findAck(int seqNum, vector<ack> ackV){
     vector<ack>::iterator it;
@@ -15,82 +14,82 @@ bool findAck(int seqNum, vector<ack> ackV){
     }
     return found;
 }
-bool boleh = false;
-void sendMessage(vector<frame> frames, int buffer_start, int buffer_size, int window_size, int sender_socket, struct sockaddr_in sender_address ) {
-    //Send some data
-    vector<frame>::iterator it;
-    char* frame_buff;
-    int size = static_cast<int>(frames.size());
-    int i =0;
-    int j = 0;
-    int window_start = 0;
-    while(i < buffer_start+buffer_size){
-        while(i < window_start+window_size){
-            //sending
-            frame_buff = frames.at(i).toChars();
-            // cout << "HERE";
-            if (sendto(sender_socket, frame_buff, sizeof(frame_buff) , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
-            {
-                cout << "Sending from sender failed with code : " << WSAGetLastError() << endl;
-                boleh = false;
-                exit(EXIT_FAILURE);
-            } else{
-                cout << "Sending from sender frame number " << frames.at(i).getSeqNum() << " success" << endl;
-                boleh = true;
-                timeOut T;
-                T.seqNum = frames.at(i).getSeqNum();
-                T.time = clock();
-                timeOutVector.push_back(T);
-            }
-            i++;
-            if ((findAck(window_start, ackVector)) && (window_start+window_size < buffer_size)){
-                window_start++;
-            }
-        }
-    }
-}
-void checkTimeOut(vector<frame> frames, int sender_socket, struct sockaddr_in sender_address){
-    while(1){
-        vector<timeOut>::iterator it;
-        int i =0;
-        for (it = timeOutVector.begin(); it != timeOutVector.end();it++){
-            if ((clock() - timeOutVector.at(i).time) > TIME_OUT){
-                char * frame_buff = frames.at(timeOutVector.at(i).seqNum).toChars();
-                if (sendto(sender_socket, frame_buff, sizeof(frame_buff) , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
-                {
-                    cout << "Sending from sender failed with code : " << WSAGetLastError() << endl;
-                    boleh = false;
-                    exit(EXIT_FAILURE);
-                } else{
-                    cout << "Sending from sender frame number " << frames.at(i).getSeqNum() << " success" << endl;
-                    boleh = true;
-                }
-            }
-            i++;
-        }
-    }
-}
-void receiveMessage(int vectorLength, int sender_socket, struct sockaddr_in sender_address) {
-    char ackString[ACK_MAX_LENGTH+5];
-    int slen = sizeof(sender_address);
-    ack realAck;
-    while (1) {
-        if (boleh){
-            memset(ackString,'\0', ACK_MAX_LENGTH+5);
-            //try to receive some data, this is a blocking call
-            if (recvfrom(sender_socket, ackString, ACK_MAX_LENGTH+5, 0, (struct sockaddr *) &sender_address, &slen) == SOCKET_ERROR)
-            {
-                cout << "sender receiving ack failed with code : " << WSAGetLastError() << endl;
-                exit(EXIT_FAILURE);
-            } else{
-                cout << "sender receiving ack successful" << endl;
-                realAck = parseToAck(ackString);
-                cout << "Ack for frame "<< realAck.getNextSeqNum() - 1 << " received" << endl;
-                ackVector.push_back(realAck);
-            }
-        }
-    }
-}
+// bool boleh = false;
+// void sendMessage(vector<frame> frames, int buffer_start, int buffer_size, int window_size, int sender_socket, struct sockaddr_in sender_address ) {
+//     //Send some data
+//     vector<frame>::iterator it;
+//     char* frame_buff;
+//     int size = static_cast<int>(frames.size());
+//     int i =0;
+//     int j = 0;
+//     int window_start = 0;
+//     while(i < buffer_start+buffer_size){
+//         while(i < window_start+window_size){
+//             //sending
+//             frame_buff = frames.at(i).toChars();
+//             // cout << "HERE";
+//             if (sendto(sender_socket, frame_buff, sizeof(frame_buff) , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
+//             {
+//                 cout << "Sending from sender failed with code : " << WSAGetLastError() << endl;
+//                 boleh = false;
+//                 exit(EXIT_FAILURE);
+//             } else{
+//                 cout << "Sending from sender frame number " << frames.at(i).getSeqNum() << " success" << endl;
+//                 boleh = true;
+//                 // timeOut T;
+//                 // T.seqNum = frames.at(i).getSeqNum();
+//                 // T.time = clock();
+//                 // timeOutVector.push_back(T);
+//             }
+//             i++;
+//             if ((findAck(window_start, ackVector)) && (window_start+window_size < buffer_size)){
+//                 window_start++;
+//             }
+//         }
+//     }
+// }
+// void checkTimeOut(vector<frame> frames, int sender_socket, struct sockaddr_in sender_address){
+//     while(1){
+//         vector<timeOut>::iterator it;
+//         int i =0;
+//         for (it = timeOutVector.begin(); it != timeOutVector.end();it++){
+//             if ((clock() - timeOutVector.at(i).time) > TIME_OUT){
+//                 char * frame_buff = frames.at(timeOutVector.at(i).seqNum).toChars();
+//                 if (sendto(sender_socket, frame_buff, sizeof(frame_buff) , 0 , (struct sockaddr *) &sender_address, sizeof(sender_address)) == SOCKET_ERROR)
+//                 {
+//                     cout << "Sending from sender failed with code : " << WSAGetLastError() << endl;
+//                     boleh = false;
+//                     exit(EXIT_FAILURE);
+//                 } else{
+//                     cout << "Sending from sender frame number " << frames.at(i).getSeqNum() << " success" << endl;
+//                     boleh = true;
+//                 }
+//             }
+//             i++;
+//         }
+//     }
+// }
+// void receiveMessage(int vectorLength, int sender_socket, struct sockaddr_in sender_address) {
+//     char ackString[ACK_MAX_LENGTH+5];
+//     int slen = sizeof(sender_address);
+//     ack realAck;
+//     while (1) {
+//         if (boleh){
+//             memset(ackString,'\0', ACK_MAX_LENGTH+5);
+//             //try to receive some data, this is a blocking call
+//             if (recvfrom(sender_socket, ackString, ACK_MAX_LENGTH+5, 0, (struct sockaddr *) &sender_address, &slen) == SOCKET_ERROR)
+//             {
+//                 cout << "sender receiving ack failed with code : " << WSAGetLastError() << endl;
+//                 exit(EXIT_FAILURE);
+//             } else{
+//                 cout << "sender receiving ack successful" << endl;
+//                 realAck = parseToAck(ackString);
+//                 cout << "Ack for frame "<< realAck.getNextSeqNum() - 1 << " received" << endl;
+//                 ackVector.push_back(realAck);
+//             }
+//         }
+//     }
+// }
 
 unsigned char generateCheckSum(char* data, int dataLength){
     unsigned int Sum = 0;
@@ -373,49 +372,26 @@ ack makeAck(frame f){
     return ack(SOH,nextSeqNum,checkSum);
 }
 
-void sendMultiThread(vector<frame> frames, int buffer_size, int window_size, char* ipAddress, unsigned short port){
-    struct sockaddr_in sender_address;
-    int initResult;
-    char* frame_buff;
-    ack realAck;
-    int sender_socket, slen=sizeof(sender_address);
-    char buf[BUF_MAX_LENGTH], ackString[ACK_MAX_LENGTH+5];
-    char message[BUF_MAX_LENGTH];
-    WSADATA wsa;
+// void sendMultiThread(vector<frame> frames, int buffer_size, int window_size, char* ipAddress, unsigned short port){
+//     struct sockaddr_in sender_address;
+//     int initResult;
+//     char* frame_buff;
+//     ack realAck;
+//     int sender_socket, slen=sizeof(sender_address);
+//     char buf[BUF_MAX_LENGTH], ackString[ACK_MAX_LENGTH+5];
+//     char message[BUF_MAX_LENGTH];
+//     WSADATA wsa;
 
-     //Initialize Winsock
-    initResult = initWinSock(wsa);
-    if (initResult != 0){
-        cout << "Initialize sender WinSock failed with code: " << WSAGetLastError()<< endl;
-        exit(EXIT_FAILURE); 
-    } else{
-        cout << "Initialize sender WinSock successful" << endl;
-    }
-    //Create socket
-    sender_socket = socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
-    if (sender_socket == INVALID_SOCKET){
-        cout << "Creating sender Socket failed with code: " << WSAGetLastError()<< endl;
-        exit(EXIT_FAILURE); 
-    } else{
-        cout << "Creating sender Socket successful" << endl;
-    }
-
-    //set sender_address
-    memset((char *) &sender_address, 0, sizeof(sender_address));
-    sender_address.sin_family = AF_INET;
-    sender_address.sin_port = htons(port);
-    sender_address.sin_addr.S_un.S_addr = inet_addr(ipAddress);
-
-    //keep communicating with server
-    int banyakFrame = static_cast<int>(frames.size());
-    int buffer_start = 0;
-    thread recvAck(receiveMessage,banyakFrame, sender_socket,sender_address);
-    recvAck.join();
-    while (buffer_start+buffer_size < banyakFrame){
-        thread sendThread(sendMessage, frames, buffer_start, buffer_size, window_size, sender_socket, sender_address );
-        sendThread.join();
-        buffer_start += buffer_size;
-    }
     
-}
-
+//     //keep communicating with server
+//     int banyakFrame = static_cast<int>(frames.size());
+//     int buffer_start = 0;
+//     thread recvAck(receiveMessage,banyakFrame, sender_socket,sender_address);
+//     recvAck.join();
+//     while (buffer_start+buffer_size < banyakFrame){
+//         thread sendThread(sendMessage, frames, buffer_start, buffer_size, window_size, sender_socket, sender_address );
+//         sendThread.join();
+//         buffer_start += buffer_size;
+//     }
+    
+// }

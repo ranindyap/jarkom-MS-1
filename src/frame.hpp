@@ -53,7 +53,7 @@ class frame{
         frame( char SOH,int seqNum,int dataLength,char* data, unsigned char checksum);
         //getter
         char getSOH();
-        int getSeqNum();
+        int getSeqNum() const;
         int getDataLength();
         char* getData();
         unsigned char getCheckSum();

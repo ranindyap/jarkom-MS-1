@@ -1,4 +1,5 @@
 #include "function.hpp"
+#include <algorithm>
 // #define PORT 8888   //The port on which to listen for incoming data
    
 int RWS;
@@ -66,6 +67,10 @@ bool isReceived(int seqNum){
     }
     return is;
 }
+bool compareBySeqNum(const frame &f1, const frame &f2) {
+    return f1.getSeqNum() < f2.getSeqNum();
+}
+
 int main(int argc, char *argv[]) 
 { 
     char* filename;
@@ -142,6 +147,7 @@ int main(int argc, char *argv[])
                 default:
                     if (FD_ISSET(sock, &read_fd)){
                         if (buffer_size == bufferFrame.size()){
+                            sort(bufferFrame.begin(), bufferFrame.end(), compareBySeqNum);
                             // write file buffer kosongin
                             vector<frame>::iterator it;
                             int k = 0;
@@ -170,8 +176,8 @@ int main(int argc, char *argv[])
                                     //     cout << buf[i]; 
                                     // }
                                     receivedFrame = parseToFrame(buf);
-                                    cout << "Terima : " << receivedFrame.getSeqNum() << endl;
-                                    cout << "WINDOW START NIIH : " << window_start << endl;
+                                    cout << "SeqNum : " << receivedFrame.getSeqNum() << endl;
+                                    cout << "window_start : " << window_start << endl;
                                     // cout<< receivedFrame.getData() << ' ' << receivedFrame.getDataLength() << endl;
                                     receivedFrame.setDataLength(lengthDataInBuffer(receivedFrame.getData()));
                                     cout << receivedFrame.getDataLength() << endl;
@@ -195,9 +201,10 @@ int main(int argc, char *argv[])
                         for(it = recvFrame.begin(); it != recvFrame.end(); it++){
                             if ((!isExist(recvFrame.at(i).getSeqNum(), ackSent)) && (!isExist(recvFrame.at(i).getSeqNum(), nakSent))){
                                 sendAck = makeAck(recvFrame.at(i));
-                                // if (recvFrame.at(i).getSeqNum() == 2){
-                                //     recvFrame.at(i).setCheckSum(2);
-                                // }
+                                // Gagalin checksum
+                                 if (recvFrame.at(i).getSeqNum() == 2){
+                                     recvFrame.at(i).setCheckSum(2);
+                                 }
                                 if (recvFrame.at(i).getCheckSum() != generateCheckSum(recvFrame.at(i).getData(), recvFrame.at(i).getDataLength())){
                                     sendAck.setIdxAck(0x0);
                                     sendAck.setNextSeqNum(sendAck.getNextSeqNum()-1);
@@ -229,6 +236,7 @@ int main(int argc, char *argv[])
             }
         }
         if(bufferFrame.size() != 0){
+            sort(bufferFrame.begin(), bufferFrame.end(), compareBySeqNum);
             vector<frame>::iterator it;
             int l = 0;
             for(it = bufferFrame.begin();it != bufferFrame.end(); it++){

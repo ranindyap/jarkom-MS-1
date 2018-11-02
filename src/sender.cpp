@@ -184,12 +184,12 @@ int main(int argc, char* argv[]){
                             //try to receive some data, this is a blocking call
                             if (recvfrom(sender_socket, ackString, ACK_MAX_LENGTH+5, 0, (struct sockaddr *) &sender_address, &slen) == SOCKET_ERROR)
                             {
-                                cout << "sender receiving ack failed with code : " << WSAGetLastError() << endl;
+                                cout << "---sender receiving ack failed with code : " << WSAGetLastError() << endl;
                                 exit(EXIT_FAILURE);
                             } else{
                                 realAck = parseToAck(ackString);
                                 if(realAck.getIdxAck() == 0x1){
-                                    cout << "sender receiving ack successful" << endl;
+                                    cout << "+++sender receiving ack successful" << endl;
                                     cout << "Ack for frame "<< realAck.getNextSeqNum() - 1 << " received" << endl;
                                     ackVector.push_back(realAck);
                                     eraseElement(realAck.getNextSeqNum() - 1, &nakVector);

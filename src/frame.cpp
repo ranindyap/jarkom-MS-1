@@ -20,7 +20,7 @@ frame::frame( char SOH,int seqNum,int dataLength,char* data, unsigned char check
 char frame::getSOH(){
     return this->SOH;
 }
-int frame::getSeqNum(){
+int frame::getSeqNum() const {
     return this->seqNum;
 }
 int frame::getDataLength(){

@@ -202,9 +202,9 @@ int main(int argc, char *argv[])
                             if ((!isExist(recvFrame.at(i).getSeqNum(), ackSent)) && (!isExist(recvFrame.at(i).getSeqNum(), nakSent))){
                                 sendAck = makeAck(recvFrame.at(i));
                                 // Gagalin checksum
-                                 if (recvFrame.at(i).getSeqNum() == 2){
-                                     recvFrame.at(i).setCheckSum(2);
-                                 }
+                                // if (recvFrame.at(i).getSeqNum() == 2){
+                                //      recvFrame.at(i).setCheckSum(2);
+                                // }
                                 if (recvFrame.at(i).getCheckSum() != generateCheckSum(recvFrame.at(i).getData(), recvFrame.at(i).getDataLength())){
                                     sendAck.setIdxAck(0x0);
                                     sendAck.setNextSeqNum(sendAck.getNextSeqNum()-1);
